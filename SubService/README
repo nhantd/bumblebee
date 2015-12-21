@@ -1,0 +1,31 @@
+Requirement:
+	Nodejs 
+	Jade
+	Redis-server 
+	MongoDB 
+	Rabbit
+	Logstash
+
+Technology use:
+	Expressjs: create http server
+	Redis: for cache object
+	Mongo: persistent data store
+	Jade: template engine
+
+Folder structure:
+	app/logics: logic for each route path
+	app/models: database schema
+	app/publics: js, css, ...
+	app/templates: jade file
+	Services: interface for all the services in the system
+
+Development:
+	Change config in Config.js
+	Change router in route.js
+	Develop new logic
+	Note:
+		- When make new Service, we should write Interface for that service in Service folder
+
+Deploy:
+	npm install
+	node server.js [port]
