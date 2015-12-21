@@ -1,30 +1,50 @@
 var Sub = require('../models/Sub.js');
 var util = require('./libs/Common.js');
-
-
+var async= require('async')
 
 var getSubs = function(film_key,episode_id, languages, cb){
 	var foundSubs = {};
 	var foundLanguages = [];
-	async.each(languages,
-		function(language, callback){
-			Sub.model.findOne({film_key:film_key,episode_id:episode_id,
-				language: language, is_available: true}, function(err, sub){
-				if ( !err && sub != null){
-					foundSubs[language] = sub.url;
-					foundLanguages.push(sub.language);
-					callback(null);
-				} else if (err) {
-					callback(err); return;
-				} else callback(null);
-			})
-		},
+	console.log(typeof(languages))
+	if (languages != 'all'){
+		//console.log('not all')
+		async.each(languages,
+			function(language, callback){
+				Sub.findOne({film_key:film_key,episode_id:episode_id,
+					language: language,is_available: true}, function(err, sub){
+					if ( !err && sub != null){
+						foundSubs[language] = sub.url;
+						foundLanguages.push(sub.language);
+						callback(null);
+					} else if (err) {
+						callback(err); return;
+					} else callback(null);
+				})
+			},
 
-		function(err){
-			var result = (!err && foundLanguages.length > 0);
-			cb(result, foundLanguages, foundSubs);
-		}
-	)
+			function(err){
+				var result = (!err && foundLanguages.length > 0);
+				cb(result, foundLanguages, foundSubs);
+			}
+		)
+	}
+	else{
+		//console.log('all')
+		Sub.find({ film_key:film_key, episode_id:episode_id, is_available: true },
+		function(cexist_err, obj){
+			if (cexist_err==null && !obj) { //if not exit
+				result=false;
+			} else if (cexist_err==null ){ 
+				result=true
+				for (var i=0; i<obj.length;i++){
+					foundLanguages.push(obj[i].language)
+					foundSubs[obj[i].language]=obj[i].url
+				}
+			}
+			cb(result, foundLanguages, foundSubs)
+		})
+
+	}
 }
 
 
@@ -32,6 +52,8 @@ exports = module.exports = function(req,res){
 
 	var locals = req.locals;
 	var result = {}
+	result.data={}
+
 	var sub = req.body;
 
 	var input = [ 
@@ -47,58 +69,36 @@ exports = module.exports = function(req,res){
 			return;
 		}
 	}
-
-	if (typeof(sub.language) == "undefined"){
-		language = 'all'
+	if (typeof(sub.language) == 'string'){
+		sub.language=sub.language.toLowerCase()
+		sub.language=[sub.language]
 	}
-	else{
-		language = sub.language.toLowerCase()
+	else if (typeof(sub.language) == 'undefined'){
+		sub.language='all'	
 	}
-	sub.language = language
-
+	else if (typeof(sub.language) == 'object'){
+		for (var i=0; i<sub.language.length; i++){
+			sub.language[i]=sub.language[i].toLowerCase()
+		}
+	}
 
 	if (typeof(sub.episode_key) == "undefined"){
-		sub.episode_key=util.getHashString(sub.film_key+sub.episode_id)
+		sub.episode_key=sub.film_key+sub.episode_id+sub.language
 	}
-
-	if (language=-'all'){
-		Sub.findOne(
-			{ episode_key:sub.episode_key, is_available: true },
-			function(cexist_err, obj){
-				if (cexist_err==null && !obj) { //if not exit
-					result.status = "001";
-					result.data = "Cannot find";
-					res.json(result);
-				} else if (cexist_err==null ){ 
-					result.status = "000";
-					result.data = obj;
-					res.json(result);
-				} else {
-					result.status = "004";
-					result.data = "Cannot check database";
-					res.json(result);
-				}
-			}	
-		)	
-	}
-	else{
-		var languages = [];
-		languages.push(language);
-		getSubs(episode_key, languages, function(rel, foundLanguages, foundSubs) {
-			if (!rel){
-				result.status='001'
-				result.data = "Cannot find";
-				res.json(result);
-			}	else{
-				result.status = "000";
-				result.data = rel;
-				res.json(result);
-			}
-		})
-	}
-
 	
-
+	var languages = sub.language;
+	getSubs(sub.film_key,sub.episode_id, languages, function(rel, foundLanguages, foundSubs) {
+		if (!rel){
+			result.status='001'
+			result.data = "Cannot find";
+			res.json(result);
+		}	else{
+			result.status = "000";
+			result.data.foundLanguages= foundLanguages;
+			result.data.foundSubs= foundSubs;
+			res.json(result);
+		}
+	})
 	
 
 

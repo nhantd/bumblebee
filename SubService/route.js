@@ -2,6 +2,7 @@
 
 exports = module.exports = function (app, router){
 
+app.use("/", router);
 	
 var logic = {
 		create : './app/logics/create.js',
@@ -11,10 +12,9 @@ var logic = {
 		get: './app/logics/get.js',
 	}
 
-router.post('/create', require(logic.create));
-router.post('/list', require(logic.list));
-router.post('/remove', require(logic.remove));
-router.post('/update', require(logic.update));
-router.post('/get', require(logic.get));
+router.post('/sub/create', require(logic.create));
+router.post('/sub/remove', require(logic.remove));
+router.post('/sub/update', require(logic.update));
+router.post('/sub/get', require(logic.get));
 	
 }

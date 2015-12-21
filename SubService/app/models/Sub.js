@@ -8,9 +8,9 @@ var SubSchema   = new Schema({
 
 	sub_key:String,
 	language: {type: String},
-	adjust: {type: Types.Number},
-	is_available: {type: Types.Boolean},
-	manually_replace: {type: Types.Boolean},
+	adjust: {type: Number},
+	is_available: {type: Boolean},
+	manually_replace: {type: Boolean},
 	url: {type: String}
 });
 

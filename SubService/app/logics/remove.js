@@ -18,16 +18,19 @@ exports = module.exports = function(req,res){
 	for ( var i = 0; i < input.length; i++ ){
 		if ( typeof(input[i])=="undefined" || !input[i] ) {
 			result.status = "003";
-			result.data = "Missing [episode_id  | film_key | url | language]";
+			result.data = "Missing [episode_id  | film_key  | language]";
 			res.json(result);
 			return;
 		}
 	}
 	sub.language=sub.language.toLowerCase()
 
-	Sub.remove({
-		{ film_key:sub.film_key,episode_id:sub.episode_id,language:sub.language}  
-	}, function (delete_error){
+	if (typeof(sub.episode_key) == "undefined"){
+		sub.episode_key=sub.film_key+sub.episode_id+sub.language
+	}
+
+	Sub.remove({ film_key:sub.film_key,episode_id:sub.episode_id,language:sub.language}  
+	,function (delete_error){
 		if (delete_error){
 			result.status = "004";
 			result.data = "Database connection error";

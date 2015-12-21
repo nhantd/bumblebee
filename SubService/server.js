@@ -16,7 +16,7 @@ require('winston-logstash');
 
 
 
-util.getIP();
+//util.getIP();
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST

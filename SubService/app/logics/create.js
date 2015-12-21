@@ -69,6 +69,10 @@ exports = module.exports = function(req,res){
 	}
 	sub.language=sub.language.toLowerCase()
 
+	if (typeof(sub.episode_key) == "undefined"){
+		sub.episode_key=sub.film_key+sub.episode_id+sub.language
+	}
+
 	Sub.find(
 		{ film_key:sub.film_key,episode_id:sub.episode_id,language:sub.language},
 		function(cexist_err, obj){

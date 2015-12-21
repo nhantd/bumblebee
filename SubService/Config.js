@@ -20,7 +20,7 @@ exports = module.exports = {
 
 	mongo_config: {
 		enable: true,
-		location: 'mongodb://127.0.0.1,10.129.93.150,10.129.100.199,10.129.102.213/'+exports.service_name+'?replicaSet=rs1'
+		location: 'mongodb://127.0.0.1/sub'
 	},
 
 	//for message queue
